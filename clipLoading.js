@@ -36,6 +36,10 @@ function ClipLoading(canvas, options) {
      *
      * -----------------------------------
      *
+     * svg:切割图形svg文件的路径 (启用该参数的时候需要引入canvg2.js)
+     *
+     * -----------------------------------
+     *
      * initPercent: 初始化进度 0-100之间
      *
      * rate:动画速率 0-1之间
@@ -63,7 +67,7 @@ function ClipLoading(canvas, options) {
         imH = options.clipHeight || 40.667,
         bgColor = options.bgColor || '#fff',
         frontColor = options.frontColor || '#e7582b',
-        scale = getScaleByOptions(options),
+        scale = getScaleByOptions(options.scale, options.width, options.height),
         rate = measureRate(options.rate) || 1;
 
     var
@@ -80,6 +84,7 @@ function ClipLoading(canvas, options) {
     updateCanvasDom();
 
     var percent = measurePercent(options.initPercent);
+
 
     function getCanvas(canvas) {
         if (canvas.tagName.toUpperCase() == 'CANVAS') {
@@ -179,14 +184,14 @@ function ClipLoading(canvas, options) {
         ctx.restore();
     }
 
-    function getScaleByOptions(options) {
+    function getScaleByOptions(mScale, mWidth, mHeight) {
         var scale = 1;
-        if (typeof options.scale == 'number') {
-            scale = options.scale;
-        } else if (typeof options.width == 'number') {
-            scale = options.width / 54.5;
-        } else if (typeof options.height == 'number') {
-            scale = options.height / 40.667
+        if (typeof mScale == 'number') {
+            scale = mScale;
+        } else if (typeof mWidth == 'number') {
+            scale = mWidth / imW;
+        } else if (typeof mHeight == 'number') {
+            scale = mHeight / imH
         }
 
         return scale;
@@ -220,6 +225,50 @@ function ClipLoading(canvas, options) {
         }
     }
 
+
+    function readSvg(src, callback) {
+
+        var imgEL = new Image();
+        imgEL.name = name;
+        imgEL.onload = function (e) {
+            var image = e.target;
+
+            //reset size
+            imW = image.width;
+            imH = image.height;
+            scale = getScaleByOptions(options.scale, options.width, options.height);
+            cW = imW * scale;
+            cH = imH * scale;
+
+            updateCanvasDom();
+
+            drawSVGImageByCanvg(image, callback);
+        };
+        imgEL.src = src;
+    }
+
+    function drawSVGImageByCanvg(img, callback) {
+        var tempCanvas = document.createElement('canvas');
+        tempCanvas.readCallback = callback;
+        tempCanvas.x = 0;
+        tempCanvas.y = 0;
+        tempCanvas.width = img.width;
+        tempCanvas.height = img.height;
+        tempCanvas.style.zIndex = -1;
+        tempCanvas.style.visibility = 'hidden';
+        document.body.appendChild(tempCanvas);
+
+        canvg(tempCanvas, img.src, {
+            ignoreMouse: true,
+            ignoreAnimation: true,
+            ignoreDimensions: true,
+            ignoreClear: true,
+            scaleWidth: img.width,
+            renderCallback: function (dom) {
+                tempCanvas.parentNode.removeChild(tempCanvas);
+            }
+        });
+    }
 
     //apis
 
@@ -307,7 +356,6 @@ function ClipLoading(canvas, options) {
             }
 
             doAni();
-
         }
     };
 
@@ -318,10 +366,31 @@ function ClipLoading(canvas, options) {
             return percent;
     };
 
-    this.render();
+    if (options.svg) {
+        readSvg(options.svg, function (code) {
+            //console.log(code);
+            var brush = new Function('return ' + code)();
+            //var brush = eval('(function (){return ' + code+'})()');
+            onClipDraw = function (ctx) {
+                brush.draw(ctx);
+            };
+            me.render();
 
+        });
+    } else {
+        this.render();
+    }
 
 }
+
+function onSVGDraw(code, canvas) {
+    if (canvas.readCallback) {
+        canvas.readCallback(code);
+    }
+
+}
+
+window.onSVGDraw = onSVGDraw;
 
 (function () {
     var lastTime = 0;

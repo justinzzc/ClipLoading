@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" name="viewport">
 
-    <title>ClipLoading</title>
+    <title>ClipLoading -- with SVG</title>
     <style>
 
 
@@ -78,12 +78,13 @@
     </style>
 
     <script src="jquery.min.js"></script>
+    <script src="../canvg2.min.js"></script>
     <script src="../clipLoading.js"></script>
 
 </head>
 <body>
 <main class="container">
-    <h1>ClipLoading</h1>
+    <h1>ClipLoading -- with SVG</h1>
 
     <div class="d-box">
         <span id="percent">20%</span>
@@ -93,10 +94,10 @@
         <div class="inner"></div>
     </div>
 
-
     <ul class="loadings">
+        <li class="loading" id="ball"></li>
         <li class="loading" id="fire"></li>
-        <li class="loading" id="mYclip"></li>
+        <li class="loading" id="star"></li>
     </ul>
 
 
@@ -105,40 +106,28 @@
 <script>
 
 
-    var fire = new ClipLoading(document.getElementById('fire'), {
-        //        scale: 4,
+    var ball = new ClipLoading(document.getElementById('ball'), {
         height: 200,
         initPercent: 20,
         rate: 0.6,
         onPercentChange: function (percent) {
             $('#percent').html(Math.floor(percent * 100) / 100 + '%');
-        }
+        },
+        svg:'./svg/football.svg'
     });
 
-    var mYclip = new ClipLoading(document.getElementById('mYclip'), {
-        //        scale: 4,
+    var fire = new ClipLoading(document.getElementById('fire'), {
         height: 200,
         initPercent: 20,
-        bgColor: '#fff',
-        rate: 0.3,
-        onComplete: function () {
-            //alert('complete');
-        },
-        onPercentChange: function (p, op) {
-            console.log("p [" + op + "]=>[" + p + "]")
-        },
-        onClipDraw: function (ctx, canvasSize, clipSize) {
-            ctx.moveTo(clipSize.width / 2, 0);
-            ctx.arcTo(clipSize.width, clipSize.height, clipSize.width / 4, clipSize.height, clipSize.width / 2);
-            ctx.fill();
-        },
-        onPercentDraw: function (ctx, canvasSize, clipSize, percent) {
-            ctx.fillStyle = '#fff';
-            ctx.fillRect(0, 0, canvasSize.width, canvasSize.height);
+        rate: 0.6,
+        svg:'./svg/fire.svg'
+    });
 
-            ctx.fillStyle = 'skyblue';
-            ctx.fillRect(0, (100 - percent) * canvasSize.height / 100, canvasSize.width, percent * canvasSize.height / 100);
-        }
+    var star = new ClipLoading(document.getElementById('star'), {
+        height: 200,
+        initPercent: 20,
+        rate: 0.6,
+        svg:'./svg/star.svg'
     });
 
 
@@ -146,11 +135,9 @@
         $('.progress-bar .inner').css({
             width: percent + '%'
         });
-
+        ball.setAniPercent(percent);
         fire.setAniPercent(percent);
-        mYclip.setAniPercent(percent);
-
-
+        star.setAniPercent(percent);
     }
 
 

@@ -88,5 +88,13 @@ new  ClipLoading(element,options)
 
 ##例子Demo
 
-详细请查看 [demo页面](./demo/demo.html)
+详细请查看 
+
++ [demo页面](./demo/demo.html)
+ - <img src="demo.png" width="400px">
+  
++ [demoSVG页面 - 导入svg绘图](./demo/demo.html)
+ - <img src="demo-svg.png" width="400px">
+
+> svg导入部分参考 [http://demo.qunee.com/svg2canvas/](http://demo.qunee.com/svg2canvas/) 赞!!
   
