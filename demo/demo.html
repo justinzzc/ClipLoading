@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" name="viewport">
+
+    <title></title>
+    <style>
+
+
+        body {
+            background: #323232;
+        }
+
+        .progress-bar {
+            width: 80%;
+            margin: 40px auto;
+            height: 30px;
+            background: #fff;
+            position: relative;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            border: none;
+            -webkit-tap-highlight-color: transparent;
+            cursor: pointer;
+
+        }
+
+        .progress-bar .inner {
+            position: absolute;
+            height: 100%;
+            left: 0;
+            top: 0;
+            background: #27c9ab;
+            width: 20%;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            border: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .loadings{
+            text-align: center;
+        }
+
+        .loading{
+            display: inline-block;
+            margin: 10px;
+            /*border: 1px solid purple;*/
+        }
+    </style>
+
+    <script src="jquery.min.js"></script>
+    <script src="../canvg2.js"></script>
+    <script src="../clipLoading.js"></script>
+
+</head>
+<body>
+<main class="container">
+
+    <div class="progress-bar">
+        <div class="inner"></div>
+    </div>
+
+    <ul class="loadings">
+        <li class="loading" id="fire"></li>
+        <li class="loading" id="mYclip"></li>
+    </ul>
+
+
+</main>
+
+<script>
+
+
+    var fire = new  ClipLoading(document.getElementById('fire'),{
+        scale: 4,
+        initPercent: 20,
+        rate:0.6
+    });
+
+    var mYclip = new ClipLoading(document.getElementById('mYclip'), {
+        scale: 4,
+        initPercent: 20,
+        bgColor: '#fff',
+        rate: 0.3,
+        onComplete: function () {
+            //alert('complete');
+        },
+        onPercentChange: function (p, op) {
+            console.log("p [" + op + "]=>[" + p + "]")
+        },
+        onClipDraw: function (ctx,canvasSize, clipSize) {
+            ctx.moveTo(clipSize.width / 2, 0);
+            ctx.arcTo(clipSize.width, clipSize.height, clipSize.width / 4, clipSize.height, clipSize.width / 2);
+            ctx.fill();
+        },
+        onPercentDraw: function (ctx, canvasSize, clipSize, percent) {
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(0, 0, canvasSize.width, canvasSize.height);
+
+            ctx.fillStyle = 'skyblue';
+            ctx.fillRect(0, (100 - percent) * canvasSize.height / 100, canvasSize.width, percent * canvasSize.height / 100);
+        }
+    });
+
+
+    function updatePercent(percent){
+        $('.progress-bar .inner').css({
+            width: percent + '%'
+        });
+        fire.setAniPercent(percent);
+        mYclip.setAniPercent(percent);
+
+    }
+
+    $('.progress-bar').on('mousedown touchstart', function (e) {
+        this._active = true;
+
+        var p;
+        if (e.originalEvent.touches) {
+            p = (e.originalEvent.touches[0].clientX - this.offsetLeft ) / $(this).width() * 100;
+        } else {
+            p = e.offsetX / $(this).width() * 100;
+        }
+
+        updatePercent(p);
+
+    });
+
+    $('.progress-bar').on('mousemove ', function (e) {
+        if (this._active) {
+            var p;
+            if (e.originalEvent.touches) {
+                p = (e.originalEvent.touches[0].clientX - this.offsetLeft ) / $(this).width() * 100;
+            } else {
+                p = e.offsetX / $(this).width() * 100;
+            }
+
+            updatePercent(p);
+        }
+    });
+
+    $('.progress-bar').on(' touchmove', function (e) {
+        var p;
+        if (e.originalEvent.touches) {
+            p = (e.originalEvent.touches[0].clientX - this.offsetLeft ) / $(this).width() * 100;
+        } else {
+            p = e.offsetX / $(this).width() * 100;
+        }
+
+
+        updatePercent(p);
+    });
+
+    $('.progress-bar').on('mouseup touchleave', function () {
+        this._active = false;
+    });
+
+
+
+</script>
+</body>
+</html>
