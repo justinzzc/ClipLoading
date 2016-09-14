@@ -5,8 +5,6 @@
 A loading progressBar based on canvas with DIY shape 
 外形可自定义的一个基于canvas的进度条
 
-![img{400,200}](demo.png)
-
 <img src="demo.png" width="400px">
 
 
