@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" name="viewport">
+
+    <title>ClipLoading -- with SVG</title>
+    <style>
+
+
+        body {
+            background: #323232;
+        }
+
+        .progress-bar {
+            width: 80%;
+            margin: 40px auto;
+            height: 30px;
+            background: #fff;
+            position: relative;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            border: none;
+            -webkit-tap-highlight-color: transparent;
+            cursor: pointer;
+
+        }
+
+        .progress-bar .inner {
+            position: absolute;
+            height: 100%;
+            left: 0;
+            top: 0;
+            background: #27c9ab;
+            width: 20%;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            border: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .loadings {
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        .loading {
+            display: inline-block;
+            margin: 10px;
+            /*border: 1px solid purple;*/
+        }
+
+        #add {
+            width: 80%;
+            height: 200px;
+            margin: 5px auto;
+            border: 3px dashed #d1d1d1;
+            background: lightyellow;
+            color: #333;
+            font-size: 30px;
+            line-height: 200px;
+            font-weight: bold;
+            text-align: center;
+            box-sizing: border-box;
+            white-space: nowrap;
+
+        }
+
+        .d-box {
+            text-align: center;
+            padding: 15px 0;
+        }
+
+        #percent {
+            display: inline-block;
+            line-height: 2em;
+            height: 2em;
+            font-size: 14px;
+            background: #fff;
+            padding: 0 1em;
+
+            min-width: 6em;
+        }
+
+        h1 {
+            color: #ffffff;
+            text-align: center;
+        }
+    </style>
+
+    <script src="jquery.min.js"></script>
+    <script src="../canvg2.min.js"></script>
+    <script src="../clipLoading.js"></script>
+
+</head>
+<body>
+
+<h1>ClipLoading -- with SVG</h1>
+
+<div class="d-box">
+    <span id="percent">20%</span>
+</div>
+
+<div class="progress-bar">
+    <div class="inner"></div>
+</div>
+<div id="add">
+    Drag .svg File Here
+</div>
+<ul class="loadings">
+    <li class="loading" id="ball"></li>
+</ul>
+
+<script>
+
+
+    var ball = new ClipLoading(document.getElementById('ball'), {
+        height: 200,
+        initPercent: 20,
+        rate: 0.6,
+        onPercentChange: function (percent) {
+            $('#percent').html(Math.floor(percent * 10) / 10 + '%');
+        },
+        svg: './svg/football.svg'
+    });
+
+
+    function cancel(e) {
+        if (e.preventDefault) {
+            e.preventDefault();
+        }
+        return false;
+    }
+
+    // Tells the browser that we *can* drop on this target
+    addEventHandler($('#add')[0], 'dragover', cancel);
+    addEventHandler($('#add')[0], 'dragenter', cancel);
+
+    addEventHandler($('#add')[0], 'drop', function (e) {
+        e = e || window.event; // get window.event if e argument missing (in IE)
+        if (e.preventDefault) {
+            e.preventDefault();
+        } // stops the browser from redirecting off to the image.
+
+
+        var files = e.dataTransfer.files;
+        for (var i = 0; i < files.length; i++) {
+            var f = files[i];
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                var dataURL = e.target.result;
+
+                var ele = $('<li class="loading"></li>');
+
+                ele.insertBefore($('.loadings li')[0]);
+
+                var mLoading = new ClipLoading(ele[0], {
+                    height: 200,
+                    initPercent: ball.getPercent(),
+                    rate: 0.6,
+                    svg: dataURL
+                });
+                loadings.push(mLoading);
+            };
+            reader.readAsDataURL(f);
+        }
+    });
+
+    var loadings = [ball];
+
+    function updatePercent(percent) {
+        $('.progress-bar .inner').css({
+            width: percent + '%'
+        });
+
+        $.each(loadings, function (i, l) {
+            l.setAniPercent(percent);
+        })
+    }
+
+
+    //normal progress Bar
+
+    $('.progress-bar').on('mousedown touchstart', function (e) {
+        this._active = true;
+
+        var p;
+        if (e.originalEvent.touches) {
+            p = (e.originalEvent.touches[0].clientX - this.offsetLeft ) / $(this).width() * 100;
+        } else {
+            p = e.offsetX / $(this).width() * 100;
+        }
+
+        updatePercent(p);
+
+    });
+
+    $('.progress-bar').on('mousemove ', function (e) {
+        if (this._active) {
+            var p;
+            if (e.originalEvent.touches) {
+                p = (e.originalEvent.touches[0].clientX - this.offsetLeft ) / $(this).width() * 100;
+            } else {
+                p = e.offsetX / $(this).width() * 100;
+            }
+
+            updatePercent(p);
+        }
+    });
+
+    $('.progress-bar').on(' touchmove', function (e) {
+        var p;
+        if (e.originalEvent.touches) {
+            p = (e.originalEvent.touches[0].clientX - this.offsetLeft ) / $(this).width() * 100;
+        } else {
+            p = e.offsetX / $(this).width() * 100;
+        }
+
+
+        updatePercent(p);
+    });
+
+    $('.progress-bar').on('mouseup touchleave', function () {
+        this._active = false;
+    });
+
+
+    function addEventHandler(obj, evt, handler) {
+        if (obj.addEventListener) {
+            // W3C method
+            obj.addEventListener(evt, handler, false);
+        } else if (obj.attachEvent) {
+            // IE method.
+            obj.attachEvent('on' + evt, handler);
+        } else {
+            // Old school method.
+            obj['on' + evt] = handler;
+        }
+    }
+
+</script>
+</body>
+</html>
