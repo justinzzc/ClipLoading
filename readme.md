@@ -1,9 +1,9 @@
 
 ##ClipLoading
 ----------
-
-A loading progressBar based on canvas with DIY shape 
-外形可自定义的一个基于canvas的进度条
+> A loading progressBar based on canvas with DIY shape
+> 外形可自定义的一个基于canvas的进度条
+[https://justinzzc.github.io/ClipLoading](https://justinzzc.github.io/ClipLoading)
 
 <img src="demo.png" width="400px">
 
@@ -90,13 +90,4 @@ new  ClipLoading(element,options)
 
 详细请查看 
 
-+ [demo页面](./demo/demo.html)
- - <img src="demo.png" width="400px">
-  
-+ [demoSVG页面 - 导入svg绘图](./demo/demoSVG.html)
- - <img src="demo-svg.png" width="400px">  
- 
-+ [demoSVG页面 - 拖拽测试](./demo/demoSVGDrag.html)
-
-> svg导入部分参考 [http://demo.qunee.com/svg2canvas/](http://demo.qunee.com/svg2canvas/) 赞!!
-  
++ [例子页面](https://justinzzc.github.io/ClipLoading)
