@@ -79,7 +79,7 @@ new  ClipLoading(element,options)
   *
   * rate:动画速率 0-1之间
   *
-  * onPercentChange: 进度变化回调方法 ,参数为(currentPercent,lastPercent)
+  * onPercentChange: 进度变化回调方法 ,参数为(currentPercent,lastPercent, isInAni)
   *
   * onComplete:进度完成100%回调方法
   *
@@ -88,6 +88,24 @@ new  ClipLoading(element,options)
   *
   */
 ~~~
+
+##实例方法
+
+###render() 
+刷新全局绘制
+
+###renderPercent() 
+刷新进度绘制
+
+###setPercent(percent) 
+设置进度 ,percent 进度值 0-100之间
+
+###setAniPercent(percent) 
+设置进度(动画缓进到指定进度) ,percent 进度值 0-100之间
+
+###getPercent() 
+获取当前进度  ,return 返回进度值
+
 
 ##例子Demo
 

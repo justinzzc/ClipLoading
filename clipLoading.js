@@ -85,7 +85,6 @@ function ClipLoading(canvas, options) {
 
     var percent = measurePercent(options.initPercent);
 
-
     function getCanvas(canvas) {
         if (canvas.tagName.toUpperCase() == 'CANVAS') {
             return canvas;
@@ -225,7 +224,6 @@ function ClipLoading(canvas, options) {
         }
     }
 
-
     function readSvg(src, callback) {
 
         var imgEL = new Image();
@@ -272,6 +270,45 @@ function ClipLoading(canvas, options) {
 
     //apis
 
+
+
+    var aniTimer = null,
+        aniStatus = {
+            from: 0,
+            tp: 0,
+            active: false
+        };
+
+    /**
+     * 刷新
+     */
+    this.render = function () {
+        ctx.restore();
+        ctx.save();
+        ctx.clearRect(0, 0, cW, cH);
+        ctx.fillStyle = "#fff";
+        fireClip(ctx);
+        ctx.globalCompositeOperation = 'source-atop';
+        me.renderPercent();
+
+    };
+
+    /**
+     * 只刷新进度(为了刷新效率和显示效果,大部分情况只要刷新进度绘制就可以)
+     */
+    this.renderPercent = function () {
+        ctx.save();
+
+        (onPercentDraw || defaultPercentDraw)(ctx, {width: cW, height: cH}, {width: imW, height: imH}, percent);
+
+        ctx.restore();
+
+    };
+
+    /**
+     * 设置进度 (进度直接显示,不绘制动画)
+     * @param p 进度  0-100 之间
+     */
     this.setPercent = function (p) {
         if (typeof p == 'number') {
 
@@ -297,34 +334,11 @@ function ClipLoading(canvas, options) {
         }
     };
 
-    var aniTimer = null,
-        aniStatus = {
-            from: 0,
-            tp: 0,
-            active: false
-        };
 
-
-    this.render = function () {
-        ctx.restore();
-        ctx.save();
-        ctx.clearRect(0, 0, cW, cH);
-        ctx.fillStyle = "#fff";
-        fireClip(ctx);
-        ctx.globalCompositeOperation = 'source-atop';
-        me.renderPercent();
-
-    };
-
-    this.renderPercent = function () {
-        ctx.save();
-
-        (onPercentDraw || defaultPercentDraw)(ctx, {width: cW, height: cH}, {width: imW, height: imH}, percent);
-
-        ctx.restore();
-
-    };
-
+    /**
+     * 进度设置 (动画缓进到指定进度)
+     * @param p 进度  0-100 之间
+     */
     this.setAniPercent = function (p) {
         if (typeof p == 'number') {
             var tp = measurePercent(p);
@@ -347,9 +361,9 @@ function ClipLoading(canvas, options) {
                 if (((percent + delta ) - aniStatus.to) * delta < 0) {
                     me.setPercent(percent + delta);
                 } else {
-                    me.setPercent(aniStatus.to);
                     cancelAnimationFrame(aniTimer);
                     aniStatus.active = false;
+                    me.setPercent(aniStatus.to);
                 }
 
                 aniTimer = requestAnimationFrame(doAni);
@@ -359,6 +373,11 @@ function ClipLoading(canvas, options) {
         }
     };
 
+    /**
+     * 获取当前进度
+     *
+     * @returns {*} 进度值 0-100之间
+     */
     this.getPercent = function () {
         if (aniStatus.active)
             return aniStatus.to;
@@ -366,28 +385,29 @@ function ClipLoading(canvas, options) {
             return percent;
     };
 
+    //使用svg文件绘制
     if (options.svg) {
         readSvg(options.svg, function (code) {
-            //console.log(code);
+
             var brush = new Function('return ' + code)();
             //var brush = eval('(function (){return ' + code+'})()');
             onClipDraw = function (ctx) {
                 brush.draw(ctx);
             };
             me.render();
-
         });
     } else {
+        //使用绘制function绘制
         this.render();
     }
 
 }
 
+//监听svg文件绘制结束事件
 function onSVGDraw(code, canvas) {
     if (canvas.readCallback) {
         canvas.readCallback(code);
     }
-
 }
 
 window.onSVGDraw = onSVGDraw;
