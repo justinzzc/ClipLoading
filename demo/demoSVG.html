@@ -91,7 +91,7 @@
         <span id="percent">20%</span>
     </div>
 
-    <div class="progress-bar">
+    <div class="progress-bar" percent="50%">
         <div class="inner"></div>
     </div>
 
@@ -113,6 +113,9 @@
         rate: 0.6,
         onPercentChange: function (percent) {
             $('#percent').html(Math.floor(percent * 100) / 100 + '%');
+            $('.progress-bar .inner').css({
+                width: percent + '%'
+            });
         },
         svg:'./svg/football.svg'
     });
@@ -133,9 +136,7 @@
 
 
     function updatePercent(percent) {
-        $('.progress-bar .inner').css({
-            width: percent + '%'
-        });
+
         ball.setAniPercent(percent);
         fire.setAniPercent(percent);
         star.setAniPercent(percent);
