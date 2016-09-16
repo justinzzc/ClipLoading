@@ -365,7 +365,6 @@ function ClipLoading(canvas, options) {
                     aniStatus.active = false;
                     me.setPercent(aniStatus.to);
                 }
-
                 aniTimer = requestAnimationFrame(doAni);
             }
 

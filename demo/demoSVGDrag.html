@@ -14,7 +14,7 @@
 
         .progress-bar {
             width: 80%;
-            margin: 40px auto;
+            margin: 40px auto 20px auto;
             height: 30px;
             background: #fff;
             position: relative;
@@ -34,7 +34,7 @@
             left: 0;
             top: 0;
             background: #27c9ab;
-            width: 20%;
+            width: 40%;
             -webkit-user-select: none;
             -moz-user-select: none;
             -ms-user-select: none;
@@ -72,11 +72,6 @@
 
         }
 
-        .d-box {
-            text-align: center;
-            padding: 15px 0;
-        }
-
         #percent {
             display: inline-block;
             line-height: 2em;
@@ -86,6 +81,26 @@
             padding: 0 1em;
 
             min-width: 6em;
+            position: relative;
+        }
+
+        #percent .bg {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height:  40% ;
+            opacity: .7;
+            background: #27c9ab;
+        }
+
+        #finger {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        #finger > * {
+            vertical-align: middle;
         }
 
         h1 {
@@ -103,12 +118,11 @@
 
 <h1>ClipLoading -- with SVG</h1>
 
-<div class="d-box">
-    <span id="percent">20%</span>
-</div>
-
 <div class="progress-bar">
     <div class="inner"></div>
+</div>
+<div id="finger">
+    <div id="percent"><span>40%</span><div class="bg"></div></div>
 </div>
 <div id="add">
     Drag .svg File Here
@@ -120,12 +134,27 @@
 <script>
 
 
+    var finger = new ClipLoading(document.getElementById('finger'), {
+        height: 30,
+        initPercent: 40,
+//        bgColor: '#cccccc',
+        frontColor: '#27c9ab',
+        svg: './svg/drag.svg'
+    });
+
+
     var ball = new ClipLoading(document.getElementById('ball'), {
         height: 200,
-        initPercent: 20,
+        initPercent: 40,
         rate: 0.6,
         onPercentChange: function (percent) {
-            $('#percent').html(Math.floor(percent * 10) / 10 + '%');
+            $('#percent span').html(Math.floor(percent * 10) / 10 + '%');
+            $('#percent .bg').css({
+                height: percent + '%'
+            });
+            $('.progress-bar .inner').css({
+                width: percent + '%'
+            });
         },
         svg: './svg/football.svg'
     });
@@ -141,7 +170,6 @@
     // Tells the browser that we *can* drop on this target
     addEventHandler($('#add')[0], 'dragover', cancel);
     addEventHandler($('#add')[0], 'dragenter', cancel);
-
     addEventHandler($('#add')[0], 'drop', function (e) {
         e = e || window.event; // get window.event if e argument missing (in IE)
         if (e.preventDefault) {
@@ -172,12 +200,10 @@
         }
     });
 
-    var loadings = [ball];
+    var loadings = [ball, finger];
 
     function updatePercent(percent) {
-        $('.progress-bar .inner').css({
-            width: percent + '%'
-        });
+
 
         $.each(loadings, function (i, l) {
             l.setAniPercent(percent);
