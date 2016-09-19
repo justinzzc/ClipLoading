@@ -54,6 +54,19 @@
             margin: 10px;
             /*border: 1px solid purple;*/
             background: url("svg/transparent.png");
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .loading .export {
+            display: inline-block;
+            padding: 5px 10px;
+            background: #6fcdf7;
+            color: #fff;
+            cursor: pointer;
+            position: absolute;
+            right: 0;
+            bottom: 0;
         }
 
         #add {
@@ -89,7 +102,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            height:  40% ;
+            height: 40%;
             opacity: .7;
             background: #27c9ab;
         }
@@ -122,22 +135,42 @@
     <div class="inner"></div>
 </div>
 <div id="finger">
-    <div id="percent"><span>40%</span><div class="bg"></div></div>
+    <div id="percent"><span>40%</span>
+
+        <div class="bg"></div>
+    </div>
 </div>
 <div id="add">
     Drag .svg File Here
 </div>
 <ul class="loadings">
-    <li class="loading" id="ball"></li>
+    <li class="loading" id="ball">
+        <span class="export">导出</span>
+    </li>
 </ul>
 
 <script>
+
+    var jsCt = '';
+    var demoHtml = '';
+
+    $.ajax({
+        url: '../clipLoading.js',
+        success: function (d) {
+            jsCt = d;
+        }
+    });
+    $.ajax({
+        url: './demo-tpl.html',
+        success: function (d) {
+            demoHtml = d;
+        }
+    });
 
 
     var finger = new ClipLoading(document.getElementById('finger'), {
         height: 30,
         initPercent: 40,
-//        bgColor: '#cccccc',
         frontColor: '#27c9ab',
         svg: './svg/drag.svg'
     });
@@ -160,6 +193,39 @@
     });
 
 
+    function downloadFile(fileName, content) {
+        var aLink = document.createElement('a');
+        var blob = new Blob([content]);
+        var evt = document.createEvent("HTMLEvents");
+        evt.initEvent("click", false, false);//initEvent 不加后两个参数在FF下会报错, 感谢 Barret Lee 的反馈
+        aLink.download = fileName;
+        aLink.href = URL.createObjectURL(blob);
+        //aLink.dispatchEvent(evt);
+        aLink.click();
+    }
+
+    $('#ball .export').click(function () {
+        exportCode(ball);
+    });
+
+    function exportCode(l) {
+        if (!confirm('确认导出?')) {
+            return;
+        }
+        var t = new Date().getTime();
+        var jsName = 'ClipLoading_' + t + '.js';
+        var demoName = 'demo_' + t + '.html';
+        var ct = jsCt.replace(/function defaultClip\(ctx, canvasSize, clipSize\) \{[^\}]*\}/mg,
+                'var defaultClip =' + l.svgBrush.draw.toString());
+
+        var htmlCt = demoHtml.replace(/@js@/, jsName).replace(/'@clipWidth@'/, l.getClipSize().width).replace(/'@clipHeight@'/, l.getClipSize().height);
+        downloadFile(jsName, ct);
+        downloadFile(demoName, htmlCt);
+
+    }
+
+
+
     function cancel(e) {
         if (e.preventDefault) {
             e.preventDefault();
@@ -167,7 +233,6 @@
         return false;
     }
 
-    // Tells the browser that we *can* drop on this target
     addEventHandler($('#add')[0], 'dragover', cancel);
     addEventHandler($('#add')[0], 'dragenter', cancel);
     addEventHandler($('#add')[0], 'drop', function (e) {
@@ -184,7 +249,7 @@
             reader.onload = function (e) {
                 var dataURL = e.target.result;
 
-                var ele = $('<li class="loading"></li>');
+                var ele = $('<li class="loading"><span class="export">导出</span></li>');
 
                 ele.insertBefore($('.loadings li')[0]);
 
@@ -195,6 +260,11 @@
                     svg: dataURL
                 });
                 loadings.push(mLoading);
+
+                $('.export', ele).click(function () {
+                    exportCode(mLoading);
+                });
+
             };
             reader.readAsDataURL(f);
         }
@@ -203,15 +273,11 @@
     var loadings = [ball, finger];
 
     function updatePercent(percent) {
-
-
         $.each(loadings, function (i, l) {
             l.setAniPercent(percent);
         })
     }
 
-
-    //normal progress Bar
 
     $('.progress-bar').on('mousedown touchstart', function (e) {
         this._active = true;
@@ -226,7 +292,6 @@
         updatePercent(p);
 
     });
-
     $('.progress-bar').on('mousemove ', function (e) {
         if (this._active) {
             var p;
@@ -239,8 +304,7 @@
             updatePercent(p);
         }
     });
-
-    $('.progress-bar').on(' touchmove', function (e) {
+    $('.progress-bar').on('touchmove', function (e) {
         var p;
         if (e.originalEvent.touches) {
             p = (e.originalEvent.touches[0].clientX - this.offsetLeft ) / $(this).width() * 100;
@@ -251,11 +315,9 @@
 
         updatePercent(p);
     });
-
     $('.progress-bar').on('mouseup touchleave', function () {
         this._active = false;
     });
-
 
     function addEventHandler(obj, evt, handler) {
         if (obj.addEventListener) {

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" name="viewport">
+
+    <title>ClipLoading</title>
+    <style>
+        body {
+            background: #323232;
+        }
+
+        .loadings {
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        .loading {
+            display: inline-block;
+            margin: 10px;
+            background: #f3f3f3;
+        }
+
+        .d-box {
+            text-align: center;
+            padding: 15px 0;
+        }
+
+        #percent {
+            display: inline-block;
+            line-height: 2em;
+            height: 2em;
+            font-size: 14px;
+            background: #fff;
+            padding: 0 1em;
+
+            min-width: 6em;
+        }
+
+        h1 {
+            color: #ffffff;
+            text-align: center;
+        }
+    </style>
+
+    <script src="@js@"></script>
+
+</head>
+<body>
+<main class="container">
+    <h1>ClipLoading</h1>
+
+    <div class="d-box">
+        <select id="percent">
+            <option value="0">0%</option>
+            <option value="10">10%</option>
+            <option value="20">20%</option>
+            <option value="30">30%</option>
+            <option value="40" selected>40%</option>
+            <option value="50">50%</option>
+            <option value="60">60%</option>
+            <option value="70">70%</option>
+            <option value="80">80%</option>
+            <option value="90">90%</option>
+            <option value="100">100%</option>
+        </select>
+    </div>
+
+
+    <ul class="loadings">
+        <li class="loading" id="fire"></li>
+    </ul>
+
+
+</main>
+
+<script>
+    var fire = new ClipLoading(document.getElementById('fire'), {
+        clipWidth:'@clipWidth@',
+        clipHeight:'@clipHeight@',
+        height: 200,
+        initPercent: 40,
+        rate: 0.6
+    });
+
+    document.getElementById('percent').onchange = (function () {
+        fire.setAniPercent(parseInt(this.value));
+    });
+
+</script>
+</body>
+</html>

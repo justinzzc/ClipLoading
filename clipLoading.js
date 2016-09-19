@@ -384,6 +384,28 @@ function ClipLoading(canvas, options) {
             return percent;
     };
 
+    /**
+     *
+     * @returns {{width: (string|number), height: (string|number)}}
+     */
+    this.getClipSize = function(){
+            return {
+                width:imW,
+                height:imH
+            }
+    };
+
+    /**
+     *
+     * @returns {{width: (string|number), height: (string|number)}}
+     */
+    this.getCanvasSize = function(){
+        return {
+            width:cW,
+            height:cH
+        }
+    };
+
     //使用svg文件绘制
     if (options.svg) {
         readSvg(options.svg, function (code) {
@@ -393,6 +415,9 @@ function ClipLoading(canvas, options) {
             onClipDraw = function (ctx) {
                 brush.draw(ctx);
             };
+            me.svgCode = code;
+            me.svgBrush = brush;
+
             me.render();
         });
     } else {
