@@ -54,6 +54,19 @@
             margin: 10px;
             /*border: 1px solid purple;*/
             background: url("svg/transparent.png");
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .loading .export {
+            display: inline-block;
+            padding: 5px 10px;
+            background: #6fcdf7;
+            color: #fff;
+            cursor: pointer;
+            position: absolute;
+            right: 0;
+            bottom: 0;
         }
 
         #add {
@@ -89,7 +102,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            height:  40% ;
+            height: 40%;
             opacity: .7;
             background: #27c9ab;
         }
@@ -112,6 +125,9 @@
     <script src="jquery.min.js"></script>
     <script src="../canvg2.min.js"></script>
     <script src="../clipLoading.js"></script>
+    <script src="./zip/zip.js"></script>
+    <script src="./zip/mime-types.js"></script>
+    <script src="ZipArchive.js"></script>
 
 </head>
 <body>
@@ -122,22 +138,43 @@
     <div class="inner"></div>
 </div>
 <div id="finger">
-    <div id="percent"><span>40%</span><div class="bg"></div></div>
+    <div id="percent"><span>40%</span>
+
+        <div class="bg"></div>
+    </div>
 </div>
 <div id="add">
     Drag .svg File Here
 </div>
 <ul class="loadings">
-    <li class="loading" id="ball"></li>
+    <li class="loading" id="ball">
+        <span class="export">导出</span>
+    </li>
 </ul>
 
 <script>
+
+    var jsCt = '';
+    var demoHtml = '';
+    var ziphelper = new ZipArchive('./zip/');
+
+    $.ajax({
+        url: '../clipLoading.js',
+        success: function (d) {
+            jsCt = d;
+        }
+    });
+    $.ajax({
+        url: './demo-tpl.html',
+        success: function (d) {
+            demoHtml = d;
+        }
+    });
 
 
     var finger = new ClipLoading(document.getElementById('finger'), {
         height: 30,
         initPercent: 40,
-//        bgColor: '#cccccc',
         frontColor: '#27c9ab',
         svg: './svg/drag.svg'
     });
@@ -160,6 +197,27 @@
     });
 
 
+    $('#ball .export').click(function () {
+        exportCode(ball);
+    });
+
+    function exportCode(l) {
+        if (!confirm('确认导出?')) {
+            return;
+        }
+        var t = new Date().getTime();
+        var jsName = 'ClipLoading_' + t + '.js';
+        var ct = jsCt.replace(/function defaultClip\(ctx, canvasSize, clipSize\) \{[^\}]*\}/mg,
+                'var defaultClip =' + l.svgBrush.draw.toString());
+
+        var htmlCt = demoHtml.replace(/@js@/, jsName).replace(/'@clipWidth@'/, l.getClipSize().width).replace(/'@clipHeight@'/, l.getClipSize().height);
+
+        ziphelper.addFile("demo.html", htmlCt);
+        ziphelper.addFile(jsName, ct);
+        ziphelper.export("demo_" + t);
+    }
+
+
     function cancel(e) {
         if (e.preventDefault) {
             e.preventDefault();
@@ -167,7 +225,6 @@
         return false;
     }
 
-    // Tells the browser that we *can* drop on this target
     addEventHandler($('#add')[0], 'dragover', cancel);
     addEventHandler($('#add')[0], 'dragenter', cancel);
     addEventHandler($('#add')[0], 'drop', function (e) {
@@ -180,11 +237,14 @@
         var files = e.dataTransfer.files;
         for (var i = 0; i < files.length; i++) {
             var f = files[i];
+            if (!f.name.endsWith('.svg')) {
+                continue;
+            }
             var reader = new FileReader();
             reader.onload = function (e) {
                 var dataURL = e.target.result;
 
-                var ele = $('<li class="loading"></li>');
+                var ele = $('<li class="loading"><span class="export">导出</span></li>');
 
                 ele.insertBefore($('.loadings li')[0]);
 
@@ -195,6 +255,11 @@
                     svg: dataURL
                 });
                 loadings.push(mLoading);
+
+                $('.export', ele).click(function () {
+                    exportCode(mLoading);
+                });
+
             };
             reader.readAsDataURL(f);
         }
@@ -203,15 +268,11 @@
     var loadings = [ball, finger];
 
     function updatePercent(percent) {
-
-
         $.each(loadings, function (i, l) {
             l.setAniPercent(percent);
         })
     }
 
-
-    //normal progress Bar
 
     $('.progress-bar').on('mousedown touchstart', function (e) {
         this._active = true;
@@ -226,7 +287,6 @@
         updatePercent(p);
 
     });
-
     $('.progress-bar').on('mousemove ', function (e) {
         if (this._active) {
             var p;
@@ -239,8 +299,7 @@
             updatePercent(p);
         }
     });
-
-    $('.progress-bar').on(' touchmove', function (e) {
+    $('.progress-bar').on('touchmove', function (e) {
         var p;
         if (e.originalEvent.touches) {
             p = (e.originalEvent.touches[0].clientX - this.offsetLeft ) / $(this).width() * 100;
@@ -251,11 +310,9 @@
 
         updatePercent(p);
     });
-
     $('.progress-bar').on('mouseup touchleave', function () {
         this._active = false;
     });
-
 
     function addEventHandler(obj, evt, handler) {
         if (obj.addEventListener) {
