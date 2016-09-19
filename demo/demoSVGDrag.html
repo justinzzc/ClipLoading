@@ -125,6 +125,9 @@
     <script src="jquery.min.js"></script>
     <script src="../canvg2.min.js"></script>
     <script src="../clipLoading.js"></script>
+    <script src="./zip/zip.js"></script>
+    <script src="./zip/mime-types.js"></script>
+    <script src="ZipArchive.js"></script>
 
 </head>
 <body>
@@ -153,6 +156,7 @@
 
     var jsCt = '';
     var demoHtml = '';
+    var ziphelper = new ZipArchive('./zip/');
 
     $.ajax({
         url: '../clipLoading.js',
@@ -193,17 +197,6 @@
     });
 
 
-    function downloadFile(fileName, content) {
-        var aLink = document.createElement('a');
-        var blob = new Blob([content]);
-        var evt = document.createEvent("HTMLEvents");
-        evt.initEvent("click", false, false);//initEvent 不加后两个参数在FF下会报错, 感谢 Barret Lee 的反馈
-        aLink.download = fileName;
-        aLink.href = URL.createObjectURL(blob);
-        //aLink.dispatchEvent(evt);
-        aLink.click();
-    }
-
     $('#ball .export').click(function () {
         exportCode(ball);
     });
@@ -214,16 +207,15 @@
         }
         var t = new Date().getTime();
         var jsName = 'ClipLoading_' + t + '.js';
-        var demoName = 'demo_' + t + '.html';
         var ct = jsCt.replace(/function defaultClip\(ctx, canvasSize, clipSize\) \{[^\}]*\}/mg,
                 'var defaultClip =' + l.svgBrush.draw.toString());
 
         var htmlCt = demoHtml.replace(/@js@/, jsName).replace(/'@clipWidth@'/, l.getClipSize().width).replace(/'@clipHeight@'/, l.getClipSize().height);
-        downloadFile(jsName, ct);
-        downloadFile(demoName, htmlCt);
 
+        ziphelper.addFile("demo.html", htmlCt);
+        ziphelper.addFile(jsName, ct);
+        ziphelper.export("demo_" + t);
     }
-
 
 
     function cancel(e) {
@@ -245,6 +237,9 @@
         var files = e.dataTransfer.files;
         for (var i = 0; i < files.length; i++) {
             var f = files[i];
+            if (!f.name.endsWith('.svg')) {
+                continue;
+            }
             var reader = new FileReader();
             reader.onload = function (e) {
                 var dataURL = e.target.result;
