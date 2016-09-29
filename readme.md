@@ -121,4 +121,7 @@ new  ClipLoading(element,options)
 - <img src="demo-svg-drag.png" width="400px"> 
 
 > svg导入部分参考 [http://demo.qunee.com/svg2canvas/](http://demo.qunee.com/svg2canvas/) 赞!!
+
+##捐赠donate
+![](https://justinzzc.github.io/imgs/donate.jpg)
   
