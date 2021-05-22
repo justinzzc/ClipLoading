@@ -1,5 +1,5 @@
 
-##ClipLoading
+## ClipLoading
 ----------
 > A loading progressBar based on canvas with DIY shape
 > 外形可自定义的一个基于canvas的进度条
@@ -8,7 +8,7 @@
 <img src="demo.png" width="400px">
 
 
-##用法
+## 用法
 
 ### 基本使用方法
 
@@ -30,7 +30,7 @@
 
 ~~~
 
-##配置项
+## 配置项
 
 new  ClipLoading(element,options)
 
@@ -89,25 +89,25 @@ new  ClipLoading(element,options)
   */
 ~~~
 
-##实例方法
+## 实例方法
 
-###render() 
+### render() 
 刷新全局绘制
 
-###renderPercent() 
+### renderPercent() 
 刷新进度绘制
 
-###setPercent(percent) 
+### setPercent(percent) 
 设置进度 ,percent 进度值 0-100之间
 
-###setAniPercent(percent) 
+### setAniPercent(percent) 
 设置进度(动画缓进到指定进度) ,percent 进度值 0-100之间
 
-###getPercent() 
+### getPercent() 
 获取当前进度  ,return 返回进度值
 
 
-##例子Demo
+## 例子Demo
 
 详细请查看 
 
@@ -122,6 +122,6 @@ new  ClipLoading(element,options)
 
 > svg导入部分参考 [http://demo.qunee.com/svg2canvas/](http://demo.qunee.com/svg2canvas/) 赞!!
 
-##捐赠donate
+## 捐赠donate
 ![](https://justinzzc.github.io/imgs/donate.jpg)
   
